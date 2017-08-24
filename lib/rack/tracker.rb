@@ -33,6 +33,9 @@ module Rack
 
     def call(env)
         @status, @headers, @body = @app.call(env)
+        puts env['REQUEST_PATH']
+        puts @status
+        puts @headers
         return [@status, @headers, @body] unless env['REQUEST_PATH'].match(/^*html/)
         response = Rack::Response.new([], @status, @headers)
 
