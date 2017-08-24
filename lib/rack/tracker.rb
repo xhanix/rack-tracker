@@ -32,7 +32,7 @@ module Rack
     end
 
     def call(env)
-      if env['REQUEST_PATH'].match(/^*html/)
+      
         @status, @headers, @body = @app.call(env)
         return [@status, @headers, @body] unless html?
         response = Rack::Response.new([], @status, @headers)
@@ -46,13 +46,13 @@ module Rack
         if response.redirection? && session
           session[EVENT_TRACKING_KEY] = env[EVENT_TRACKING_KEY]
         end
-
+        if env['REQUEST_PATH'].match(/^*html/)
         @body.each { |fragment| response.write inject(env, fragment) }
         @body.close if @body.respond_to?(:close)
-
+        end
         response.finish
       end
-    end
+    
 
     private
 
