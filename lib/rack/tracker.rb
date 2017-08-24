@@ -32,24 +32,26 @@ module Rack
     end
 
     def call(env)
-      @status, @headers, @body = @app.call(env)
-      return [@status, @headers, @body] unless html?
-      response = Rack::Response.new([], @status, @headers)
+      if env['REQUEST_PATH'].match(/^*html/)
+        @status, @headers, @body = @app.call(env)
+        return [@status, @headers, @body] unless html?
+        response = Rack::Response.new([], @status, @headers)
 
-      env[EVENT_TRACKING_KEY] ||= {}
+        env[EVENT_TRACKING_KEY] ||= {}
 
-      if session = env["rack.session"]
-        env[EVENT_TRACKING_KEY].deep_merge!(session.delete(EVENT_TRACKING_KEY) || {}) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
+        if session = env["rack.session"]
+          env[EVENT_TRACKING_KEY].deep_merge!(session.delete(EVENT_TRACKING_KEY) || {}) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
+        end
+
+        if response.redirection? && session
+          session[EVENT_TRACKING_KEY] = env[EVENT_TRACKING_KEY]
+        end
+
+        @body.each { |fragment| response.write inject(env, fragment) }
+        @body.close if @body.respond_to?(:close)
+
+        response.finish
       end
-
-      if response.redirection? && session
-        session[EVENT_TRACKING_KEY] = env[EVENT_TRACKING_KEY]
-      end
-
-      @body.each { |fragment| response.write inject(env, fragment) }
-      @body.close if @body.respond_to?(:close)
-
-      response.finish
     end
 
     private
