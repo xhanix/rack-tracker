@@ -33,10 +33,8 @@ module Rack
 
     def call(env)
         @status, @headers, @body = @app.call(env)
-        puts env['REQUEST_PATH']
-        puts @status
-        puts @headers
-        return [@status, @headers, @body] unless env['REQUEST_PATH'].match(/^*html/)
+        return [@status, @headers, @body] unless html
+        return [@status, @headers, @body] if env['REQUEST_PATH'].match(/^*amp/)
         response = Rack::Response.new([], @status, @headers)
 
         env[EVENT_TRACKING_KEY] ||= {}
