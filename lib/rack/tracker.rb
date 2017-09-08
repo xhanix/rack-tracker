@@ -34,7 +34,8 @@ module Rack
     def call(env)
         @status, @headers, @body = @app.call(env)
         return [@status, @headers, @body] unless html?
-        return [@status, @headers, @body] if (env['REQUEST_PATH'].match(/^*amp/) || mobile_device?)
+        puts @body
+        return [@status, @headers, @body] if env['REQUEST_PATH'].match(/^*amp/)
         response = Rack::Response.new([], @status, @headers)
 
         env[EVENT_TRACKING_KEY] ||= {}
