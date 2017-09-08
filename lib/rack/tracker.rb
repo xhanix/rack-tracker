@@ -62,6 +62,15 @@ module Rack
       response
     end
 
+    def mobile_device?
+      if session[:mobile_override]
+        session[:mobile_override] == "1"
+      else
+        # Season this regexp to taste. I prefer to treat iPad as non-mobile.
+        (request.user_agent =~ /Mobile|webOS/) && (request.user_agent !~ /iPad/)
+      end
+    end
+
     class HandlerSet
       class Handler
         def initialize(name, options)
