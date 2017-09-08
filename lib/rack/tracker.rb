@@ -34,7 +34,7 @@ module Rack
     def call(env)
         @status, @headers, @body = @app.call(env)
         return [@status, @headers, @body] unless html?
-        puts @body
+        puts @body.body
         return [@status, @headers, @body] if env['REQUEST_PATH'].match(/^*amp/)
         response = Rack::Response.new([], @status, @headers)
 
@@ -61,15 +61,6 @@ module Rack
         handler.inject(response)
       end
       response
-    end
-
-    def mobile_device?
-      if session[:mobile_override]
-        session[:mobile_override] == "1"
-      else
-        # Season this regexp to taste. I prefer to treat iPad as non-mobile.
-        (request.user_agent =~ /Mobile|webOS/) && (request.user_agent !~ /iPad/)
-      end
     end
 
     class HandlerSet
