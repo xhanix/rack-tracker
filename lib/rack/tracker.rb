@@ -34,7 +34,10 @@ module Rack
     def call(env)
         @status, @headers, @body = @app.call(env)
         return [@status, @headers, @body] unless html?
-        isAMP = @body.body.include? "amp-img"
+        isAMP = false
+        if @body.body?
+          isAMP = @body.body.include? "amp-img"
+        end
         return [@status, @headers, @body] if (env['REQUEST_PATH'].match(/^*amp/) || isAMP)
         response = Rack::Response.new([], @status, @headers)
 
