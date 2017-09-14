@@ -35,8 +35,6 @@ module Rack
         @status, @headers, @body = @app.call(env)
         return [@status, @headers, @body] unless html?
         isAMP = false
-        puts "**********************"
-        puts @body.class.name
         if @body.class.name == "ActionDispatch"
           isAMP = @body.body.include? "amp-img"
         end
