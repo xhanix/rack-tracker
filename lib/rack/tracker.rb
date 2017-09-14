@@ -38,9 +38,10 @@ module Rack
         puts "**********************"
         puts @headers
         puts @body
-        if @body.body?
-          isAMP = @body.body.include? "amp-img"
-        end
+        
+
+        isAMP = @body.include? "amp-img"
+        
         return [@status, @headers, @body] if (env['REQUEST_PATH'].match(/^*amp/) || isAMP)
         response = Rack::Response.new([], @status, @headers)
 
