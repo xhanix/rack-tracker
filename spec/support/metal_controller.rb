@@ -14,6 +14,18 @@ class MetalController < ActionController::Metal
   append_view_path File.join(File.dirname(__FILE__), '../fixtures/views')
   layout 'application'
 
+  def turing
+    tracker do |t|
+      t.track_all_the_things like: 'turing'
+      t.another_handler likes: 'turing'
+    end
+    render "metal/turing", layout: false
+  end
+
+  def do_not_track_alan
+    render "metal/turing", layout: false
+  end
+
   def index
     tracker do |t|
       t.track_all_the_things like: 'no-one-else'
@@ -31,7 +43,9 @@ class MetalController < ActionController::Metal
 
   def facebook_pixel
     tracker do |t|
-      t.facebook_pixel :track, { id: 'conversion-event', value: '1', currency: 'EUR' }
+      t.facebook_pixel :track, { type: 'Purchase', options: { value: 42, currency: 'USD' } }
+      t.facebook_pixel :track, { type: 'CompleteRegistration', options: { value: 0.75, currency: 'EUR' } }
+      t.facebook_pixel :track_custom, { type: 'FrequentShopper', options: { purchases: 24, category: 'Sport' } }
     end
     render "metal/index"
   end
@@ -93,5 +107,9 @@ class MetalController < ActionController::Metal
       t.zanox :lead, { customer_i_d: '654321' }
     end
     render 'metal/index'
+  end
+
+  def hotjar
+    render "metal/index"
   end
 end

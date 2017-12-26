@@ -21,6 +21,7 @@ require "rack/tracker/vwo/vwo"
 require "rack/tracker/go_squared/go_squared"
 require "rack/tracker/criteo/criteo"
 require "rack/tracker/zanox/zanox"
+require "rack/tracker/hotjar/hotjar"
 
 module Rack
   class Tracker
@@ -67,28 +68,34 @@ module Rack
     end
 
     class HandlerSet
-      class Handler
-        def initialize(name, options)
-          @name = name
-          @options = options
-        end
-
+      Handler = Struct.new(:klass, :configuration) do
         def init(env)
-          @name.new(env, @options)
+          klass.new(env, configuration)
         end
       end
 
       def initialize(&block)
         @handlers = []
-        self.instance_exec(&block) if block_given?
+        instance_exec(&block) if block_given?
       end
 
-      def handler(name, opts = {}, &block)
-        @handlers << Handler.new(Rack::Tracker::HandlerDelegator.handler(name), opts)
+      # setup the handler class with configuration options and make it ready for receiving the env during injection
+      #
+      # usage:
+      #
+      #   use Rack::Tracker do
+      #     handler :google_analytics, { tracker: 'U-XXXXX-Y' }
+      #   end
+      #
+      def handler(name, configuration = {}, &block)
+        # we need here "something" (which is atm the handler struct)
+        # to postpone the initialization of the handler,
+        # to give it the env and configuration options when the result of the handler is injected into the response.
+        @handlers << Handler.new(Rack::Tracker::HandlerDelegator.handler(name), configuration)
       end
 
       def each(env = {}, &block)
-        @handlers.map{|h| h.init(env)}.each(&block)
+        @handlers.map { |h| h.init(env) }.each(&block)
       end
     end
   end
