@@ -39,7 +39,7 @@ module Rack
         if @body.class.name == "ActionDispatch"
           isAMP = @body.body.include? "amp-img"
         end
-        puts env
+        puts @headers
         return [@status, @headers, @body] if (env['REQUEST_PATH'].match(/^*amp/) || isAMP)
         response = Rack::Response.new([], @status, @headers)
 
