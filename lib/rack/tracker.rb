@@ -40,7 +40,7 @@ module Rack
           isAMP = @body.body.include? "amp-img"
         end
 
-        return [@status, @headers, @body] if (isAMP)
+        return [@status, @headers, @body] if (env['REQUEST_PATH'].match(/^*amp/) || isAMP)
         response = Rack::Response.new([], @status, @headers)
 
         env[EVENT_TRACKING_KEY] ||= {}
